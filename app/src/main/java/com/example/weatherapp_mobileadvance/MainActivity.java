@@ -36,7 +36,8 @@ public class MainActivity extends AppCompatActivity {
     private ImageView imgWeatherIcon;
     private WeatherViewModel weatherViewModel;
     private HourlyAdapter hourlyAdapter;
-    private RecyclerView recyclerHourly;
+    private RecyclerView recyclerHourly, recyclerDaily;
+    private DailyForecastAdapter dailyAdapter;
 
 
     @Override
@@ -105,45 +106,47 @@ public class MainActivity extends AppCompatActivity {
         // Lấy dự báo theo giờ từ API (ví dụ: Hồ Chí Minh)
         weatherViewModel.fetchHourlyForecast(10.75, 106.6667);
 
-
-//        List<HourlyForecast> hourlyList = Arrays.asList(
-//                new HourlyForecast("12h", R.drawable.ic_sunny, "31°C"),
-//                new HourlyForecast("13h", R.drawable.ic_sunny, "32°C"),
-//                new HourlyForecast("14h", R.drawable.ic_cloudy, "30°C"),
-//                new HourlyForecast("15h", R.drawable.ic_sunny, "31°C"),
-//                new HourlyForecast("16h", R.drawable.ic_sunny, "32°C"),
-//                new HourlyForecast("17h", R.drawable.ic_cloudy, "30°C"),
-//                new HourlyForecast("18h", R.drawable.ic_sunny, "31°C"),
-//                new HourlyForecast("19h", R.drawable.ic_sunny, "32°C"),
-//                new HourlyForecast("20h", R.drawable.ic_cloudy, "30°C")
-//        );
-//
-//        HourlyAdapter hourlyAdapter = new HourlyAdapter(hourlyList);
-//        RecyclerView recyclerHourly = findViewById(R.id.recyclerHourly);
-//        recyclerHourly.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-//        recyclerHourly.setAdapter(hourlyAdapter);
-
-
-        RecyclerView recyclerDaily = findViewById(R.id.recyclerDaily);
-
-        List<DailyForecast> dailyList = new ArrayList<>();
-        dailyList.add(new DailyForecast("Thứ 2", R.drawable.ic_sunny, "26°C - 32°C"));
-        dailyList.add(new DailyForecast("Thứ 3", R.drawable.ic_rainy, "24°C - 30°C"));
-        dailyList.add(new DailyForecast("Thứ 4", R.drawable.ic_cloudy, "25°C - 31°C"));
-        dailyList.add(new DailyForecast("Thứ 5", R.drawable.ic_sunny, "26°C - 32°C"));
-        dailyList.add(new DailyForecast("Thứ 6", R.drawable.ic_rainy, "24°C - 30°C"));
-        dailyList.add(new DailyForecast("Thứ 7", R.drawable.ic_cloudy, "25°C - 31°C"));
-        dailyList.add(new DailyForecast("Thứ 8", R.drawable.ic_sunny, "26°C - 32°C"));
-        dailyList.add(new DailyForecast("Thứ 2", R.drawable.ic_rainy, "24°C - 30°C"));
-        dailyList.add(new DailyForecast("Thứ 3", R.drawable.ic_cloudy, "25°C - 31°C"));
-        dailyList.add(new DailyForecast("Thứ 4", R.drawable.ic_sunny, "26°C - 32°C"));
-        dailyList.add(new DailyForecast("Thứ 5", R.drawable.ic_rainy, "24°C - 30°C"));
-        dailyList.add(new DailyForecast("Thứ 6", R.drawable.ic_cloudy, "25°C - 31°C"));
-        // Thêm bao nhiêu ngày tùy bạn
-
-        DailyForecastAdapter adapter = new DailyForecastAdapter(dailyList);
+        // Ánh xạ RecyclerView cho DailyForecast
+        recyclerDaily = findViewById(R.id.recyclerDaily);
         recyclerDaily.setLayoutManager(new LinearLayoutManager(this));
-        recyclerDaily.setAdapter(adapter);
+
+        // Khởi tạo adapter rỗng
+        dailyAdapter = new DailyForecastAdapter(new ArrayList<>());
+        recyclerDaily.setAdapter(dailyAdapter);
+
+        // Quan sát LiveData từ ViewModel
+        weatherViewModel.getDailyForecast().observe(this, new Observer<List<DailyForecast>>() {
+            @Override
+            public void onChanged(List<DailyForecast> dailyForecasts) {
+                if (dailyForecasts != null) {
+                    dailyAdapter.setData(dailyForecasts); // Giả sử bạn có hàm này trong Adapter
+                } else {
+                    Toast.makeText(MainActivity.this, "Không thể lấy dữ liệu dự báo ngày.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+
+//        RecyclerView recyclerDaily = findViewById(R.id.recyclerDaily);
+//
+//        List<DailyForecast> dailyList = new ArrayList<>();
+//        dailyList.add(new DailyForecast("Thứ 4", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
+//        dailyList.add(new DailyForecast("Thứ 5", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
+//        dailyList.add(new DailyForecast("Thứ 6", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
+//        dailyList.add(new DailyForecast("Thứ 7", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
+//        dailyList.add(new DailyForecast("Thứ 2", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
+//        dailyList.add(new DailyForecast("Thứ 3", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
+//        dailyList.add(new DailyForecast("Thứ 4", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
+//        dailyList.add(new DailyForecast("Thứ 5", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
+//        dailyList.add(new DailyForecast("Thứ 6", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
+//        dailyList.add(new DailyForecast("Thứ 47", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
+//
+//
+//        // Thêm bao nhiêu ngày tùy bạn
+//
+//        DailyForecastAdapter adapter = new DailyForecastAdapter(dailyList);
+//        recyclerDaily.setLayoutManager(new LinearLayoutManager(this));
+//        recyclerDaily.setAdapter(adapter);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
