@@ -1,0 +1,25 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp"
+    android:gravity="center_vertical">
+
+    <TextView android:id="@+id/tv_day"
+        android:text="Thứ 2"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:textColor="#fff"
+        android:layout_height="match_parent"/>
+
+    <ImageView android:id="@+id/img_icon"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/ic_cloudy" />
+
+    <TextView android:id="@+id/tv_temp"
+        android:text="27°C - 32°C"
+        android:layout_marginStart="8dp"
+        android:textColor="#fff"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</LinearLayout>
