@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.weatherapp_mobileadvance.R;
 import com.example.weatherapp_mobileadvance.models.HourlyForecast;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -19,6 +20,11 @@ public class HourlyAdapter extends RecyclerView.Adapter<HourlyAdapter.HourlyView
 
     public HourlyAdapter(List<HourlyForecast> list) {
         this.list = list;
+    }
+
+    public void setData(List<HourlyForecast> newData) {
+        this.list = newData;
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -33,7 +39,7 @@ public class HourlyAdapter extends RecyclerView.Adapter<HourlyAdapter.HourlyView
     public void onBindViewHolder(@NonNull HourlyViewHolder holder, int position) {
         HourlyForecast item = list.get(position);
         holder.tvHour.setText(item.hour);
-        holder.imgIcon.setImageResource(item.iconResId);
+        Picasso.get().load(item.iconUrl).into(holder.imgIcon);
         holder.tvTemp.setText(item.temperature);
     }
 

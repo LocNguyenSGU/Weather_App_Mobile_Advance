@@ -2,7 +2,7 @@ package com.example.weatherapp_mobileadvance.models;
 
 import java.util.List;
 
-public class WeatherResponse {
+public class WeatherResponse { // current weather
     private Main main;
     private List<Weather> weather;
     private String name;

@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.weatherapp_mobileadvance.adapter.DailyForecastAdapter;
 import com.example.weatherapp_mobileadvance.adapter.HourlyAdapter;
 import com.example.weatherapp_mobileadvance.models.DailyForecast;
+import com.example.weatherapp_mobileadvance.models.ForecastResponse;
 import com.example.weatherapp_mobileadvance.models.HourlyForecast;
 import com.example.weatherapp_mobileadvance.models.WeatherResponse;
 import com.example.weatherapp_mobileadvance.networks.APIService;
@@ -34,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvLocation, tvTemperature, tvDescription, tvHumidity, tvWindSpeed;
     private ImageView imgWeatherIcon;
     private WeatherViewModel weatherViewModel;
+    private HourlyAdapter hourlyAdapter;
+    private RecyclerView recyclerHourly;
 
 
     @Override
@@ -78,23 +81,47 @@ public class MainActivity extends AppCompatActivity {
         // Lấy thông tin thời tiết từ API (Ví dụ: Hồ Chí Minh)
         weatherViewModel.fetchWeather("Ho Chi Minh");
 
-
-        List<HourlyForecast> hourlyList = Arrays.asList(
-                new HourlyForecast("12h", R.drawable.ic_sunny, "31°C"),
-                new HourlyForecast("13h", R.drawable.ic_sunny, "32°C"),
-                new HourlyForecast("14h", R.drawable.ic_cloudy, "30°C"),
-                new HourlyForecast("15h", R.drawable.ic_sunny, "31°C"),
-                new HourlyForecast("16h", R.drawable.ic_sunny, "32°C"),
-                new HourlyForecast("17h", R.drawable.ic_cloudy, "30°C"),
-                new HourlyForecast("18h", R.drawable.ic_sunny, "31°C"),
-                new HourlyForecast("19h", R.drawable.ic_sunny, "32°C"),
-                new HourlyForecast("20h", R.drawable.ic_cloudy, "30°C")
-        );
-
-        HourlyAdapter hourlyAdapter = new HourlyAdapter(hourlyList);
-        RecyclerView recyclerHourly = findViewById(R.id.recyclerHourly);
+        // Ánh xạ view
+        recyclerHourly = findViewById(R.id.recyclerHourly);
         recyclerHourly.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+
+        hourlyAdapter = new HourlyAdapter(new ArrayList<>());
         recyclerHourly.setAdapter(hourlyAdapter);
+
+        weatherViewModel = new WeatherViewModel();
+
+        // Quan sát forecast
+        weatherViewModel.getHourlyForecast().observe(this, new Observer<List<HourlyForecast>>() {
+            @Override
+            public void onChanged(List<HourlyForecast> forecasts) {
+                if (forecasts != null) {
+                    hourlyAdapter.setData(forecasts);  // Cập nhật data adapter
+                } else {
+                    Toast.makeText(MainActivity.this, "Không thể lấy dữ liệu dự báo giờ.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        // Lấy dự báo theo giờ từ API (ví dụ: Hồ Chí Minh)
+        weatherViewModel.fetchHourlyForecast(10.75, 106.6667);
+
+
+//        List<HourlyForecast> hourlyList = Arrays.asList(
+//                new HourlyForecast("12h", R.drawable.ic_sunny, "31°C"),
+//                new HourlyForecast("13h", R.drawable.ic_sunny, "32°C"),
+//                new HourlyForecast("14h", R.drawable.ic_cloudy, "30°C"),
+//                new HourlyForecast("15h", R.drawable.ic_sunny, "31°C"),
+//                new HourlyForecast("16h", R.drawable.ic_sunny, "32°C"),
+//                new HourlyForecast("17h", R.drawable.ic_cloudy, "30°C"),
+//                new HourlyForecast("18h", R.drawable.ic_sunny, "31°C"),
+//                new HourlyForecast("19h", R.drawable.ic_sunny, "32°C"),
+//                new HourlyForecast("20h", R.drawable.ic_cloudy, "30°C")
+//        );
+//
+//        HourlyAdapter hourlyAdapter = new HourlyAdapter(hourlyList);
+//        RecyclerView recyclerHourly = findViewById(R.id.recyclerHourly);
+//        recyclerHourly.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+//        recyclerHourly.setAdapter(hourlyAdapter);
 
 
         RecyclerView recyclerDaily = findViewById(R.id.recyclerDaily);

@@ -16,9 +16,10 @@ public interface APIService {
             @Query("lang") String lang
     );
 
-    @GET("forecast")
-    Call<ForecastResponse> getForecast(
-            @Query("q") String city,
+    @GET("forecast/hourly")
+     Call<ForecastResponse> getHourlyForecast(
+            @Query("lat") double lat,
+            @Query("lon") double lon,
             @Query("appid") String apiKey,
             @Query("units") String units,
             @Query("lang") String lang
