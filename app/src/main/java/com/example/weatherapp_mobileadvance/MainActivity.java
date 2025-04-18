@@ -1,12 +1,17 @@
 package com.example.weatherapp_mobileadvance;
 
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -17,18 +22,16 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.weatherapp_mobileadvance.adapter.DailyForecastAdapter;
 import com.example.weatherapp_mobileadvance.adapter.HourlyAdapter;
 import com.example.weatherapp_mobileadvance.models.DailyForecast;
-import com.example.weatherapp_mobileadvance.models.ForecastResponse;
 import com.example.weatherapp_mobileadvance.models.HourlyForecast;
 import com.example.weatherapp_mobileadvance.models.WeatherResponse;
-import com.example.weatherapp_mobileadvance.networks.APIService;
 import com.example.weatherapp_mobileadvance.viewModel.WeatherViewModel;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import retrofit2.Call;
-import retrofit2.Callback;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.squareup.picasso.Picasso;
 
 public class MainActivity extends AppCompatActivity {
@@ -38,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private HourlyAdapter hourlyAdapter;
     private RecyclerView recyclerHourly, recyclerDaily;
     private DailyForecastAdapter dailyAdapter;
+    private FusedLocationProviderClient fusedLocationClient;
 
 
     @Override
@@ -54,8 +58,18 @@ public class MainActivity extends AppCompatActivity {
         tvWindSpeed = findViewById(R.id.tv_wind_speed);
         imgWeatherIcon = findViewById(R.id.imgWeatherIcon);
 
+
         // Khởi tạo WeatherViewModel
         weatherViewModel = new WeatherViewModel();
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    1001); // Request code tùy bạn đặt
+            return;
+        }
+
+
 
         // Quan sát dữ liệu thời tiết từ WeatherViewModel
         weatherViewModel.getWeather().observe(this, new Observer<WeatherResponse>() {
@@ -80,7 +94,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Lấy thông tin thời tiết từ API (Ví dụ: Hồ Chí Minh)
-        weatherViewModel.fetchWeather("Ho Chi Minh");
+//        weatherViewModel.fetchWeather("Ho Chi Minh");
+        getCurrentLocation();
+
 
         // Ánh xạ view
         recyclerHourly = findViewById(R.id.recyclerHourly);
@@ -89,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
         hourlyAdapter = new HourlyAdapter(new ArrayList<>());
         recyclerHourly.setAdapter(hourlyAdapter);
 
-        weatherViewModel = new WeatherViewModel();
 
         // Quan sát forecast
         weatherViewModel.getHourlyForecast().observe(this, new Observer<List<HourlyForecast>>() {
@@ -104,7 +119,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // Lấy dự báo theo giờ từ API (ví dụ: Hồ Chí Minh)
-        weatherViewModel.fetchHourlyForecast(10.75, 106.6667);
+//        weatherViewModel.fetchHourlyForecast(10.75, 106.6667);
 
         // Ánh xạ RecyclerView cho DailyForecast
         recyclerDaily = findViewById(R.id.recyclerDaily);
@@ -126,28 +141,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-//        RecyclerView recyclerDaily = findViewById(R.id.recyclerDaily);
-//
-//        List<DailyForecast> dailyList = new ArrayList<>();
-//        dailyList.add(new DailyForecast("Thứ 4", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
-//        dailyList.add(new DailyForecast("Thứ 5", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
-//        dailyList.add(new DailyForecast("Thứ 6", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
-//        dailyList.add(new DailyForecast("Thứ 7", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
-//        dailyList.add(new DailyForecast("Thứ 2", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
-//        dailyList.add(new DailyForecast("Thứ 3", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
-//        dailyList.add(new DailyForecast("Thứ 4", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
-//        dailyList.add(new DailyForecast("Thứ 5", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
-//        dailyList.add(new DailyForecast("Thứ 6", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
-//        dailyList.add(new DailyForecast("Thứ 47", "Nhiều mây", "https://openweathermap.org/img/wn/04n@2x.png" , "26°C", "32°C"));
-//
-//
-//        // Thêm bao nhiêu ngày tùy bạn
-//
-//        DailyForecastAdapter adapter = new DailyForecastAdapter(dailyList);
-//        recyclerDaily.setLayoutManager(new LinearLayoutManager(this));
-//        recyclerDaily.setAdapter(adapter);
-
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
@@ -155,5 +148,40 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void getCurrentLocation() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if (location != null) {
+                            double latitude = location.getLatitude();
+                            double longitude = location.getLongitude();
+                            Log.d("DEBUGLOC", "Lat11111: " + latitude + " - Lon: " + longitude);
+                            // Gọi API với tọa độ lấy được
+                             latitude = 10.7769; // hcm city
+                             longitude = 106.7009;
+                            weatherViewModel.fetchWeatherByCoordinates(latitude, longitude);
+                            weatherViewModel.fetchHourlyForecast(latitude, longitude);
+                        } else {
+                            Toast.makeText(MainActivity.this, "Không lấy được vị trí.", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    // ⬇️ THÊM NGAY SAU onCreate hoặc getCurrentLocation
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1001 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            getCurrentLocation(); // gọi lại sau khi được cấp quyền
+        }
+    }
 }
+

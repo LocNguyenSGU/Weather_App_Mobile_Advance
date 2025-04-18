@@ -10,6 +10,7 @@ constraintlayout = "2.2.1"
 playServicesMaps = "19.2.0"
 retrofit = "2.9.0"
 picasso = "2.71828"  # Thêm dòng này cho Picasso
+playServicesLocation = "21.0.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -23,6 +24,7 @@ play-services-maps = { group = "com.google.android.gms", name = "play-services-m
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
 picasso = { module = "com.squareup.picasso:picasso", version.ref = "picasso" }  # Thêm dòng này cho Picasso
+play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
