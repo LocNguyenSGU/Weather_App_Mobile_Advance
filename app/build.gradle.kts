@@ -44,4 +44,5 @@ dependencies {
     implementation(libs.converter.gson)
     implementation(libs.picasso)
     implementation(libs.play.services.location)
+    implementation(libs.play.services.maps)
 }

@@ -11,6 +11,8 @@ playServicesMaps = "19.2.0"
 retrofit = "2.9.0"
 picasso = "2.71828"  # Thêm dòng này cho Picasso
 playServicesLocation = "21.0.1"
+gms-maps = "18.2.0"
+gms-location = "21.0.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }

@@ -34,6 +34,13 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.squareup.picasso.Picasso;
 
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
 public class MainActivity extends AppCompatActivity {
     private TextView tvLocation, tvTemperature, tvDescription, tvHumidity, tvWindSpeed;
     private ImageView imgWeatherIcon;
@@ -42,6 +49,9 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerHourly, recyclerDaily;
     private DailyForecastAdapter dailyAdapter;
     private FusedLocationProviderClient fusedLocationClient;
+
+    private MapView mapView;
+    private static final String MAP_VIEW_BUNDLE_KEY = "MapViewBundleKey";
 
 
     @Override
@@ -70,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-
         // Quan sát dữ liệu thời tiết từ WeatherViewModel
         weatherViewModel.getWeather().observe(this, new Observer<WeatherResponse>() {
             @Override
@@ -93,10 +102,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Lấy thông tin thời tiết từ API (Ví dụ: Hồ Chí Minh)
-//        weatherViewModel.fetchWeather("Ho Chi Minh");
         getCurrentLocation();
-
 
         // Ánh xạ view
         recyclerHourly = findViewById(R.id.recyclerHourly);
@@ -118,8 +124,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Lấy dự báo theo giờ từ API (ví dụ: Hồ Chí Minh)
-//        weatherViewModel.fetchHourlyForecast(10.75, 106.6667);
 
         // Ánh xạ RecyclerView cho DailyForecast
         recyclerDaily = findViewById(R.id.recyclerDaily);
@@ -141,11 +145,36 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        mapView = findViewById(R.id.mapView);
+
+        Bundle mapViewBundle = null;
+        if (savedInstanceState != null) {
+            mapViewBundle = savedInstanceState.getBundle(MAP_VIEW_BUNDLE_KEY);
+        }
+
+        mapView.onCreate(mapViewBundle);
+
+        // Đợi map load xong
+        mapView.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                double lat = 10.7769;
+                double lon = 106.7009;
+
+                LatLng location = new LatLng(lat, lon);
+                googleMap.addMarker(new MarkerOptions().position(location).title("Vị trí hiện tại"));
+                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 12f));
+            }
+        });
+
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+
     }
 
     private void getCurrentLocation() {
@@ -182,6 +211,48 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 1001 && grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             getCurrentLocation(); // gọi lại sau khi được cấp quyền
         }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mapView.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mapView.onStop();
+    }
+
+    @Override
+    protected void onPause() {
+        mapView.onPause();
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        mapView.onDestroy();
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Bundle mapViewBundle = outState.getBundle(MAP_VIEW_BUNDLE_KEY);
+        if (mapViewBundle == null) {
+            mapViewBundle = new Bundle();
+            outState.putBundle(MAP_VIEW_BUNDLE_KEY, mapViewBundle);
+        }
+
+        mapView.onSaveInstanceState(mapViewBundle);
     }
 }
 
