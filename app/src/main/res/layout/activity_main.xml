@@ -208,12 +208,19 @@
 
             <!-- MapView -->
             <!-- Google MapView -->
-            <com.google.android.gms.maps.MapView
-                android:id="@+id/mapView"
+
+            <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:layout_alignParentBottom="true"
-                android:layout_margin="18dp"/>
+                android:layout_margin="18dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="8dp">
+
+                <com.google.android.gms.maps.MapView
+                    android:id="@+id/mapView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
+            </androidx.cardview.widget.CardView>
 
             <!-- Spinner for selecting layer -->
             <Spinner
@@ -225,10 +232,6 @@
                 android:layout_alignParentEnd="true"
                 android:background="@android:drawable/btn_dropdown"
                 android:spinnerMode="dropdown" />
-
-
-
-
 
         </LinearLayout>
     </ScrollView>
