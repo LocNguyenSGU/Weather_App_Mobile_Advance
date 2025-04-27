@@ -14,11 +14,12 @@ import com.example.weatherapp_mobileadvance.models.DailyForecast;
 import com.example.weatherapp_mobileadvance.models.HourlyForecast;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DailyForecastAdapter extends RecyclerView.Adapter<DailyForecastAdapter.DailyViewHolder> {
 
-    private List<DailyForecast> forecastList;
+    private List<DailyForecast> forecastList = new ArrayList<>();
 
     public DailyForecastAdapter(List<DailyForecast> forecastList) {
         this.forecastList = forecastList;
@@ -56,6 +57,9 @@ public class DailyForecastAdapter extends RecyclerView.Adapter<DailyForecastAdap
 
     @Override
     public int getItemCount() {
+        if (forecastList == null) {
+            return 0; // Nếu danh sách là null, trả về 0
+        }
         return forecastList.size();
     }
 

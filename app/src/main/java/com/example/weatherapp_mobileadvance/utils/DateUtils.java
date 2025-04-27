@@ -5,20 +5,16 @@ import java.util.Date;
 import java.util.Locale;
 
 public class DateUtils {
-    public static String formatToVietnameseDay(String dtTxt) {
-        SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US);
+    public static String formatToVietnameseDay(long dt) {
+        // Chuyển đổi Unix timestamp (giây) thành đối tượng Date
+        Date date = new Date(dt * 1000); // Nhân với 1000 để chuyển đổi từ giây sang mili giây
+
+        // Định dạng ngày giờ theo kiểu Việt Nam
         SimpleDateFormat outputFormat = new SimpleDateFormat("EEEE, dd/MM", new Locale("vi", "VN"));
+        String formatted = outputFormat.format(date);
 
-        try {
-            Date date = inputFormat.parse(dtTxt);
-            String formatted = outputFormat.format(date);
-
-            // Chuyển chữ cái đầu của "thứ" thành hoa (Thứ hai -> Thứ Hai)
-            return capitalizeFirstLetter(formatted);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            return "";
-        }
+        // Chuyển chữ cái đầu của "thứ" thành hoa (Thứ hai -> Thứ Hai)
+        return capitalizeFirstLetter(formatted);
     }
 
     private static String capitalizeFirstLetter(String input) {

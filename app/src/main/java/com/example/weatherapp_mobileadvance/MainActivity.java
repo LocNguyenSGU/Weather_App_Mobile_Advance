@@ -181,6 +181,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 weatherViewModel.fetchWeatherByCoordinates(latitude, longitude);
                 weatherViewModel.fetchHourlyForecast(latitude, longitude);
+                weatherViewModel.fetchDailyForecast(latitude, longitude, 15);
 
                 if (mMap != null) {
                     LatLng loc = new LatLng(latitude, longitude);
