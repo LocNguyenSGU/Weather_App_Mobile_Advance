@@ -17,17 +17,6 @@
         android:textSize="16sp"
         android:gravity="start" />
 
-    <!-- Ngày -->
-<!--    <TextView-->
-<!--        android:id="@+id/tv_description"-->
-<!--        android:layout_width="0dp"-->
-<!--        android:layout_weight="1"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:text="Nhiều mây"-->
-<!--        android:textColor="#FFFFFF"-->
-<!--        android:textSize="16sp"-->
-<!--        android:gravity="start" />-->
-
     <!-- Icon thời tiết -->
     <ImageView
         android:id="@+id/img_weather_icon"

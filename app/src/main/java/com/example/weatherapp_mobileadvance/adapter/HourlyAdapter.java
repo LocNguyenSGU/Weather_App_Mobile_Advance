@@ -1,5 +1,6 @@
 package com.example.weatherapp_mobileadvance.adapter;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import java.util.List;
 
 public class HourlyAdapter extends RecyclerView.Adapter<HourlyAdapter.HourlyViewHolder>{
     private List<HourlyForecast> list;
+    private boolean isCelsius = true;
 
     public HourlyAdapter(List<HourlyForecast> list) {
         this.list = list;
@@ -40,7 +42,33 @@ public class HourlyAdapter extends RecyclerView.Adapter<HourlyAdapter.HourlyView
         HourlyForecast item = list.get(position);
         holder.tvHour.setText(item.hour);
         Picasso.get().load(item.iconUrl).into(holder.imgIcon);
-        holder.tvTemp.setText(item.temperature);
+
+        String temp = item.getTemperature(); // VD: "30.24°C"
+        Log.d("NHIET", temp);
+
+        String tempText = temp; // Mặc định
+        try {
+            if (temp.contains("°C")) {
+                // Đang °C, chuyển sang °F nếu cần
+                float value = Float.parseFloat(temp.replace("°C", ""));
+                if (!isCelsius) { // Nếu app đang muốn °F
+                    float fValue = (value * 9 / 5) + 32;
+                    tempText = String.format("%.1f°F", fValue);
+                }
+            } else if (temp.contains("°F")) {
+                // Đang °F, chuyển sang °C nếu cần
+                float value = Float.parseFloat(temp.replace("°F", ""));
+                if (isCelsius) { // Nếu app đang muốn °C
+                    float cValue = (value - 32) * 5 / 9;
+                    tempText = String.format("%.1f°C", cValue);
+                }
+            }
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            // Nếu bị lỗi parse thì giữ nguyên temp
+        }
+
+        holder.tvTemp.setText(tempText);
     }
 
     @Override
@@ -58,5 +86,10 @@ public class HourlyAdapter extends RecyclerView.Adapter<HourlyAdapter.HourlyView
             tvTemp = itemView.findViewById(R.id.tv_temp);
             imgIcon = itemView.findViewById(R.id.img_icon);
         }
+    }
+
+    public void toggleTempUnit() {
+        isCelsius = !isCelsius;
+        notifyDataSetChanged(); // Refresh toàn bộ list
     }
 }

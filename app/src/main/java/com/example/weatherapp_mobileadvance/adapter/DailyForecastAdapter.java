@@ -20,6 +20,7 @@ import java.util.List;
 public class DailyForecastAdapter extends RecyclerView.Adapter<DailyForecastAdapter.DailyViewHolder> {
 
     private List<DailyForecast> forecastList = new ArrayList<>();
+    private boolean isCelsius = true;
 
     public DailyForecastAdapter(List<DailyForecast> forecastList) {
         this.forecastList = forecastList;
@@ -50,8 +51,12 @@ public class DailyForecastAdapter extends RecyclerView.Adapter<DailyForecastAdap
                 .placeholder(R.drawable.ic_placeholder) // Icon tạm trong khi chờ
                 .error(R.drawable.ic_error) // Icon lỗi nếu load fail
                 .into(holder.imgIcon);
-        holder.tvTempRange.setText(forecast.tempMin + " - " + forecast.tempMax);
 
+        // Định dạng nhiệt độ:
+        String tempRange = forecast.tempMin + " - " + forecast.tempMax; // ví dụ "30°C - 34°C"
+
+        // Gọi hàm để chuyển đổi nhiệt độ (tuỳ isCelsius)
+        holder.tvTempRange.setText(formatTemperatureRange(tempRange));
 
     }
 
@@ -74,5 +79,37 @@ public class DailyForecastAdapter extends RecyclerView.Adapter<DailyForecastAdap
             imgIcon = itemView.findViewById(R.id.img_weather_icon);
             tvTempRange = itemView.findViewById(R.id.tv_temp_range);
         }
+    }
+
+    private String formatTemperatureRange(String tempRange) {
+        // tempRange ví dụ: "30°C - 34°C"
+        String[] parts = tempRange.split(" - ");
+        if (parts.length != 2) return tempRange; // Nếu format sai thì trả luôn
+
+        String tempMin = parts[0].replace("°C", "").replace("°F", "").trim();
+        String tempMax = parts[1].replace("°C", "").replace("°F", "").trim();
+
+        try {
+            float min = Float.parseFloat(tempMin);
+            float max = Float.parseFloat(tempMax);
+
+            if (!isCelsius) {
+                // Đổi sang độ F
+                min = (min * 9 / 5) + 32;
+                max = (max * 9 / 5) + 32;
+                return String.format("%.1f°F - %.1f°F", min, max);
+            } else {
+                // Để độ C
+                return String.format("%.1f°C - %.1f°C", min, max);
+            }
+        } catch (NumberFormatException e) {
+            e.printStackTrace();
+            return tempRange; // lỗi thì trả về như cũ
+        }
+    }
+
+    public void toggleTempUnit() {
+        isCelsius = !isCelsius;
+        notifyDataSetChanged(); // Refresh toàn bộ list
     }
 }

@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -60,6 +61,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private RecyclerView recyclerHourly, recyclerDaily;
     private DailyForecastAdapter dailyAdapter;
     private FusedLocationProviderClient fusedLocationClient;
+    private boolean isCelsius = true; // Mặc định là Celsius
 
     private GoogleMap mMap;
     private MapView mapView;
@@ -165,6 +167,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         // Lấy vị trí
         getCurrentLocation();
+        setupTempToggle();
     }
 
     private void getCurrentLocation() {
@@ -270,6 +273,33 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             outState.putBundle(MAP_VIEW_BUNDLE_KEY, mapViewBundle);
         }
         mapView.onSaveInstanceState(mapViewBundle);
+    }
+
+
+    private void setupTempToggle() {
+        LinearLayout layoutToggleTemp = findViewById(R.id.layout_toggle_temp);
+        TextView tvTemperature = findViewById(R.id.tv_temperature); // Text hiển thị nhiệt độ
+        TextView tvCelsius = findViewById(R.id.tv_celsius);
+        TextView tvFahrenheit = findViewById(R.id.tv_fahrenheit);
+
+        layoutToggleTemp.setOnClickListener(v -> {
+            String tempText = tvTemperature.getText().toString(); // Lấy text hiện tại
+            float tempValue = Float.parseFloat(tempText.replace("°C", "").replace("°F", ""));
+
+            if (isCelsius) {
+                // Đổi C -> F
+                float tempInFahrenheit = (tempValue * 9 / 5) + 32;
+                tvTemperature.setText(String.format("%.1f°F", tempInFahrenheit));
+            } else {
+                // Đổi F -> C
+                float tempInCelsius = (tempValue - 32) * 5 / 9;
+                tvTemperature.setText(String.format("%.1f°C", tempInCelsius));
+            }
+
+            isCelsius = !isCelsius; // Đảo trạng thái
+            hourlyAdapter.toggleTempUnit();
+            dailyAdapter.toggleTempUnit();
+        });
     }
 }
 

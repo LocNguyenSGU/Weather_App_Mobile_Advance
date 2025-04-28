@@ -28,14 +28,60 @@
                 android:gravity="center_horizontal"
                 android:padding="16dp">
 
-                <TextView
-                    android:id="@+id/tv_my_location"
-                    android:layout_width="wrap_content"
+                <RelativeLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Vị trí hiện tại"
-                    android:textSize="24sp"
-                    android:gravity="center_horizontal"
-                    android:textColor="#FFFFFF" />
+                    android:paddingBottom="8dp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp">
+
+                    <TextView
+                        android:id="@+id/tv_my_location"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:text="Vị trí hiện tại"
+                        android:textSize="24sp"
+                        android:textColor="#FFFFFF" />
+
+                    <LinearLayout
+                        android:id="@+id/layout_toggle_temp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/tv_celsius"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="°C"
+                            android:textSize="16sp"
+                            android:textColor="#FFFFFF"
+                            android:paddingEnd="4dp" />
+
+                        <ImageView
+                            android:id="@+id/iv_temp_unit_toggle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_temp_toggle"
+                            android:contentDescription="Chuyển đổi độ C/độ F"
+                            android:padding="4dp"
+                            app:tint="#FFFFFF" />
+
+                        <TextView
+                            android:id="@+id/tv_fahrenheit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="°F"
+                            android:textSize="16sp"
+                            android:textColor="#FFFFFF"
+                            android:paddingStart="4dp" />
+                    </LinearLayout>
+
+                </RelativeLayout>
+
 
                 <TextView
                     android:id="@+id/tv_location"
