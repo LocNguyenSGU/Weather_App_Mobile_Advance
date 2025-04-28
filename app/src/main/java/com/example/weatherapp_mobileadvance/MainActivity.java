@@ -29,6 +29,8 @@ import com.example.weatherapp_mobileadvance.adapter.HourlyAdapter;
 import com.example.weatherapp_mobileadvance.models.DailyForecast;
 import com.example.weatherapp_mobileadvance.models.HourlyForecast;
 import com.example.weatherapp_mobileadvance.models.WeatherResponse;
+import com.example.weatherapp_mobileadvance.service.WeatherNotificationManager;
+import com.example.weatherapp_mobileadvance.service.WeatherNotificationScheduler;
 import com.example.weatherapp_mobileadvance.viewModel.WeatherViewModel;
 
 import java.net.MalformedURLException;
@@ -106,6 +108,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String iconCode = weatherResponse.getWeather().get(0).getIcon();
                 String iconUrl = "https://openweathermap.org/img/wn/" + iconCode + "@2x.png";
                 Picasso.get().load(iconUrl).into(imgWeatherIcon);
+
+                // Gọi WeatherNotificationScheduler để lên lịch thông báo
+                WeatherNotificationScheduler.scheduleWeatherNotification(this);
+
+                // Kiểm tra và gửi thông báo nếu cần
+                WeatherNotificationManager.checkAndNotifyWeather(this, weatherResponse);
+                // Gọi WeatherNotificationScheduler để lên lịch thông báo
             } else {
                 Toast.makeText(this, "Không thể lấy dữ liệu thời tiết.", Toast.LENGTH_SHORT).show();
             }
