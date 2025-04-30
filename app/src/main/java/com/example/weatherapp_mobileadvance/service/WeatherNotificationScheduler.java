@@ -4,7 +4,6 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.SystemClock;
 import android.util.Log;
 
 import java.util.Calendar;
@@ -12,84 +11,103 @@ import java.util.TimeZone;
 
 public class WeatherNotificationScheduler {
 
-    private static final String TAG = "WeatherNotificationScheduler"; // Đặt tag cho log
+    private static final String TAG = "WeatherNotificationScheduler";
 
-    public static void scheduleWeatherNotification(Context context) {
-        // Lấy thời gian hiện tại
-        long currentTime = System.currentTimeMillis();
-        Log.d(TAG, "Thời gian hiện tại (milliseconds): " + currentTime);
+    /**
+     * Lên lịch gửi thông báo hàng ngày vào một giờ/phút cố định (ví dụ: 16h00 mỗi ngày)
+     */
+    public static void scheduleDailyNotificationAt(Context context, int hourOfDay, int minute) {
+        long triggerTime = getNextTriggerTime(hourOfDay, minute);
+        Log.d(TAG, "Thời gian thông báo tiếp theo (millis): " + triggerTime);
 
-        // Tính toán thời gian còn lại cho 9:36 sáng
-        long nineThirtySixAMTime = getNineThirtySixAMTime(currentTime);
-        Log.d(TAG, "Thời gian tính cho 9:36 sáng: " + nineThirtySixAMTime);
-
-        // Tạo Intent và PendingIntent
         Intent intent = new Intent(context, WeatherNotificationReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE
+        );
 
-        Log.d(TAG, "PendingIntent đã được tạo.");
-
-        // Sử dụng AlarmManager để đặt lịch gửi thông báo
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         if (alarmManager != null) {
-            Log.d(TAG, "Đặt lịch gửi thông báo.");
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, currentTime, 30 * 1000, pendingIntent);
-//            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, nineThirtySixAMTime, AlarmManager.INTERVAL_DAY, pendingIntent);
-            Log.d(TAG, "Thông báo đã được lên lịch để gửi vào lúc 9:36 sáng hàng ngày.");
+            alarmManager.setRepeating(
+                    AlarmManager.RTC_WAKEUP,
+                    triggerTime,
+                    AlarmManager.INTERVAL_DAY,
+                    pendingIntent
+            );
+            Log.d(TAG, "Thông báo đã được lên lịch hàng ngày vào " + hourOfDay + ":" + minute);
         } else {
             Log.e(TAG, "Không thể lấy AlarmManager.");
         }
     }
 
-    // Hàm tính thời gian cho 9:36 sáng
-    private static long getNineThirtySixAMTime(long currentTime) {
-        // Lấy thời gian bắt đầu ngày hôm nay (00:00 sáng) theo múi giờ của hệ thống
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(currentTime);
+    /**
+     * Lên lịch gửi thông báo định kỳ sau mỗi intervalMillis (ví dụ mỗi 30 giây)
+     */
+    public static void scheduleRepeatingNotification(Context context, long intervalMillis) {
+        long triggerTime = System.currentTimeMillis();
 
-        // Đặt lại thời gian để bắt đầu từ 00:00 sáng của ngày hôm nay
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
+        Intent intent = new Intent(context, WeatherNotificationReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE
+        );
+
+        AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        if (alarmManager != null) {
+            alarmManager.setRepeating(
+                    AlarmManager.RTC_WAKEUP,
+                    triggerTime,
+                    intervalMillis,
+                    pendingIntent
+            );
+            Log.d(TAG, "Thông báo định kỳ mỗi " + (intervalMillis / 1000) + " giây đã được lên lịch.");
+        } else {
+            Log.e(TAG, "Không thể lấy AlarmManager.");
+        }
+    }
+
+    /**
+     * Tính toán thời gian (milliseconds) cho thời điểm gần nhất trong tương lai ứng với giờ/phút chỉ định
+     */
+    private static long getNextTriggerTime(int hourOfDay, int minute) {
+        Calendar calendar = Calendar.getInstance(TimeZone.getDefault());
+        calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
+        calendar.set(Calendar.MINUTE, minute);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
 
-        // Cộng thêm 9 giờ và 36 phút
-        calendar.add(Calendar.HOUR_OF_DAY, 10);
-        calendar.add(Calendar.MINUTE, 35);
+        long now = System.currentTimeMillis();
+        long scheduledTime = calendar.getTimeInMillis();
 
-        // Lấy thời gian đã tính toán (mili giây)
-        long nineThirtySixAMTime = calendar.getTimeInMillis();
+        if (scheduledTime <= now) {
+            // Nếu thời gian đã trôi qua trong ngày, chuyển sang ngày mai
+            calendar.add(Calendar.DAY_OF_YEAR, 1);
+            scheduledTime = calendar.getTimeInMillis();
+        }
 
-        // Log thời gian đã tính, cần điều chỉnh múi giờ nếu cần
-        calendar.setTimeInMillis(nineThirtySixAMTime);
-        TimeZone timeZone = TimeZone.getDefault(); // Múi giờ hiện tại của hệ thống
-        int offset = timeZone.getOffset(calendar.getTimeInMillis()) / (60 * 1000); // Múi giờ theo phút
-
-        Log.d(TAG, "Thời gian 9:36 sáng (múi giờ hệ thống): " + calendar.getTime().toString() + " (offset: " + offset + " phút)");
-
-        return nineThirtySixAMTime;
+        return scheduledTime;
     }
 
-    // Hàm để lên lịch thông báo mỗi 30 giây
-    public static void scheduleWeatherNotificationEvery30Sec(Context context) {
-        // Lấy thời gian hiện tại
-        long currentTime = System.currentTimeMillis();
-        Log.d(TAG, "Thời gian hiện tại (milliseconds): " + currentTime);
-
-        // Tạo Intent và PendingIntent
+    /**
+     * Hủy thông báo đã lên lịch (nếu cần)
+     */
+    public static void cancelScheduledNotification(Context context) {
         Intent intent = new Intent(context, WeatherNotificationReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                context,
+                0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE
+        );
 
-        Log.d(TAG, "PendingIntent đã được tạo.");
-
-        // Sử dụng AlarmManager để đặt lịch gửi thông báo mỗi 30 giây
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         if (alarmManager != null) {
-            Log.d(TAG, "Đặt lịch gửi thông báo sau mỗi 30 giây.");
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, currentTime, 30 * 1000, pendingIntent); // 30 * 1000 = 30 giây
-            Log.d(TAG, "Thông báo sẽ được gửi mỗi 30 giây.");
-        } else {
-            Log.e(TAG, "Không thể lấy AlarmManager.");
+            alarmManager.cancel(pendingIntent);
+            Log.d(TAG, "Đã hủy lịch gửi thông báo.");
         }
     }
 }

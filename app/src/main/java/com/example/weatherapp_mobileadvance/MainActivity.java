@@ -1,8 +1,8 @@
 package com.example.weatherapp_mobileadvance;
 
 import android.content.pm.PackageManager;
-import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -20,15 +20,11 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.weatherapp_mobileadvance.adapter.DailyForecastAdapter;
 import com.example.weatherapp_mobileadvance.adapter.HourlyAdapter;
-import com.example.weatherapp_mobileadvance.models.DailyForecast;
-import com.example.weatherapp_mobileadvance.models.HourlyForecast;
-import com.example.weatherapp_mobileadvance.models.WeatherResponse;
 import com.example.weatherapp_mobileadvance.service.WeatherNotificationManager;
 import com.example.weatherapp_mobileadvance.service.WeatherNotificationScheduler;
 import com.example.weatherapp_mobileadvance.viewModel.WeatherViewModel;
@@ -36,7 +32,6 @@ import com.example.weatherapp_mobileadvance.viewModel.WeatherViewModel;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -45,7 +40,6 @@ import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.TileProvider;
 import com.google.android.gms.maps.model.UrlTileProvider;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.squareup.picasso.Picasso;
 
 import com.google.android.gms.maps.MapView;
@@ -64,6 +58,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private DailyForecastAdapter dailyAdapter;
     private FusedLocationProviderClient fusedLocationClient;
     private boolean isCelsius = true; // Mặc định là Celsius
+
+    private final Handler handler = new Handler();
+    private final int INTERVAL = 30 * 1000; // 30 giây
 
     private GoogleMap mMap;
     private MapView mapView;
@@ -109,12 +106,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String iconUrl = "https://openweathermap.org/img/wn/" + iconCode + "@2x.png";
                 Picasso.get().load(iconUrl).into(imgWeatherIcon);
 
-                // Gọi WeatherNotificationScheduler để lên lịch thông báo
-                WeatherNotificationScheduler.scheduleWeatherNotification(this);
 
-                // Kiểm tra và gửi thông báo nếu cần
-                WeatherNotificationManager.checkAndNotifyWeather(this, weatherResponse);
-                // Gọi WeatherNotificationScheduler để lên lịch thông báo
+
+//                WeatherNotificationScheduler.scheduleDailyNotificationAt(this, 17, 16);
+//                WeatherNotificationManager.checkAndNotifyWeather(this, weatherResponse.getMain().getTemp(), weatherResponse.getMain().getHumidity(), weatherResponse.getWeather().get(0).getDescription());
+
+                startWeatherCheckingLoop();
+
+
             } else {
                 Toast.makeText(this, "Không thể lấy dữ liệu thời tiết.", Toast.LENGTH_SHORT).show();
             }
@@ -309,6 +308,26 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             hourlyAdapter.toggleTempUnit();
             dailyAdapter.toggleTempUnit();
         });
+    }
+
+    private void startWeatherCheckingLoop() {
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                weatherViewModel.getWeather().observe(MainActivity.this, weatherResponse -> {
+                    if (weatherResponse != null) {
+                        float temp = weatherResponse.getMain().getTemp();
+                        int humidity = weatherResponse.getMain().getHumidity();
+                        String description = weatherResponse.getWeather().get(0).getDescription();
+
+                        WeatherNotificationManager.checkAndNotifyWeather(MainActivity.this, temp, humidity, description);
+                    }
+                });
+
+                // Lặp lại sau 30 giây
+                handler.postDelayed(this, INTERVAL);
+            }
+        }, INTERVAL);
     }
 }
 
