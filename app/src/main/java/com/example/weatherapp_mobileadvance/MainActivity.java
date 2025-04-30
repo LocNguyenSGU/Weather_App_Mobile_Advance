@@ -9,6 +9,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,12 +27,12 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.weatherapp_mobileadvance.adapter.DailyForecastAdapter;
 import com.example.weatherapp_mobileadvance.adapter.HourlyAdapter;
 import com.example.weatherapp_mobileadvance.service.WeatherNotificationManager;
-import com.example.weatherapp_mobileadvance.service.WeatherNotificationScheduler;
 import com.example.weatherapp_mobileadvance.viewModel.WeatherViewModel;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Locale;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -105,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String iconCode = weatherResponse.getWeather().get(0).getIcon();
                 String iconUrl = "https://openweathermap.org/img/wn/" + iconCode + "@2x.png";
                 Picasso.get().load(iconUrl).into(imgWeatherIcon);
+                setWeatherBackground(weatherResponse.getWeather().get(0).getMain());
 
 
 
@@ -187,8 +189,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (location != null) {
                 double latitude = location.getLatitude();
                 double longitude = location.getLongitude();
-                latitude = 10.7769;
-                longitude = 106.7009;
+//                latitude = 10.7769;
+//                longitude = 106.7009;
 
                 weatherViewModel.fetchWeatherByCoordinates(latitude, longitude);
                 weatherViewModel.fetchHourlyForecast(latitude, longitude);
@@ -328,6 +330,66 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 handler.postDelayed(this, INTERVAL);
             }
         }, INTERVAL);
+    }
+
+
+    private void setWeatherBackground(String weatherMain) {
+        RelativeLayout mainLayout = findViewById(R.id.main);
+
+        // Lấy giờ hiện tại
+        Calendar calendar = Calendar.getInstance();
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+
+        boolean isNight = (hour < 6 || hour >= 18); // Ban đêm là trước 6h sáng hoặc sau 6h tối
+
+        int backgroundResId;
+
+        switch (weatherMain) {
+            case "Clear":
+                backgroundResId = isNight ?
+                        R.drawable.background_clear_night_image : R.drawable.background_clear_day_image;
+                break;
+
+            case "Clouds":
+                backgroundResId = isNight ?
+                        R.drawable.background_cloudy_night_image : R.drawable.background_cloudy_day_image;
+                break;
+
+            case "Rain":
+            case "Drizzle":
+                backgroundResId = isNight ?
+                        R.drawable.background_rainy_night_image : R.drawable.background_rainy_day_image;
+                break;
+
+//            case "Thunderstorm":
+//                backgroundResId = R.drawable.background_thunderstorm;
+//                break;
+//
+//            case "Snow":
+//                backgroundResId = R.drawable.background_snow;
+//                break;
+//
+            case "Mist":
+            case "Fog":
+            case "Haze":
+            case "Dust":
+            case "Smoke":
+                backgroundResId = isNight ?
+                        R.drawable.background_foggy_night : R.drawable.background_foggy_day;
+                break;
+//
+//            case "Tornado":
+//            case "Squall":
+//                backgroundResId = R.drawable.background_stormy;
+//                break;
+
+            default:
+                backgroundResId = isNight ?
+                        R.drawable.background_rainy_night_image : R.drawable.background_normal_day_image;
+                break;
+        }
+
+        mainLayout.setBackgroundResource(backgroundResId);
     }
 }
 

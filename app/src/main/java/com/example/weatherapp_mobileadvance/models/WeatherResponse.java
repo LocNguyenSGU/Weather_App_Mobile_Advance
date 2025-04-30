@@ -26,9 +26,12 @@ public class WeatherResponse { // current weather
     public class Weather {
         private String description;
         private String icon;
+        private String main;
 
         public String getDescription() { return description; }
         public String getIcon() { return icon; }
+        public String getMain() { return main; }
+
     }
 
     public class Wind {
